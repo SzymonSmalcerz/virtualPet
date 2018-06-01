@@ -1,23 +1,5 @@
 
 let GameState = {
-
-  init : function (){
-    this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-    this.scale.pageAlignHorizontally = true;
-    this.scale.pageAlignVertically = true;
-    this.scale.refresh();
-
-  },
-  preload : function(){
-
-    this.load.image("background", "assets/background.png");
-
-    this.load.spritesheet("monkey", "assets/monkey_spritesheet.png",180,180,5);
-
-    this.load.image("banana", "assets/banana.png");
-    this.load.image("candy", "assets/candy.png");
-    this.load.image("refresh", "assets/refresh.png");
-  },
   create : function(){
 
     this.background = this.game.add.sprite(0,0,"background");
