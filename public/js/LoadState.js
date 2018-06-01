@@ -8,13 +8,12 @@ let LoadState = {
     this.progressBar.anchor.setTo(0.5);
     this.load.setPreloadSprite(this.progressBar);
 
-    this.load.image("ground", "assets/ground.png");
-    this.load.spritesheet("fire", "assets/fire.png",32,32,5);
-    this.load.image("ball", "assets/ball.png");
-    this.load.image("platform", "assets/platform.png");
-    this.load.image("queen", "assets/queen.png");
-    this.load.image("moveBox", "assets/moveBox.png");
-    this.load.image("jumpBox", "assets/jumpBox.png");
+
+    this.load.image("fatjpg", "assets/fatjpg.jpg");
+    this.load.image("background", "assets/background.png");
+    this.load.image("banana", "assets/banana.png");
+    this.load.image("candy", "assets/candy.png");
+    this.load.image("refresh", "assets/refresh.png");
   },
   create(){
     this.game.state.start("HomeState");
