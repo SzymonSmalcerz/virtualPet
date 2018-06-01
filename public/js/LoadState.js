@@ -12,6 +12,7 @@ let LoadState = {
     this.load.image("banana", "assets/banana.png");
     this.load.image("candy", "assets/candy.png");
     this.load.image("refresh", "assets/refresh.png");
+    this.load.image("fatjpg", "assets/fatjpg.jpg");
   },
   create(){
     this.game.state.start("HomeState");
