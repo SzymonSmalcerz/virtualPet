@@ -1,130 +1,152 @@
 
 let GameState = {
   create : function(){
+    this.background = this.game.add.sprite(0,0,"background");
+    this.background.inputEnabled = true;
+    this.background.events.onInputDown.add(this.leaveFood, this);
 
 
-    this.ninja = this.game.add.sprite(this.game.world.centerX,this.game.world.centerY,"ninja",0);
-    this.ninja.anchor.setTo(0.5);
-    this.ninja.inputEnabled = true;
-    this.ninja.input.pixelPerfectClick = true;
-    this.ninja.input.enableDrag();
-    this.ninja.animations.add("walk",[1,2,3,2],6,true);
-    this.ninja.customParams = {
-      speed : 250
+    this.game.add.text(20, 20, "health", this.textStyle);
+    this.game.add.text(200, 20, "fun", this.textStyle);
+    this.healthText = this.game.add.text(100, 20, "100", this.textStyle);
+    this.funText = this.game.add.text(250, 20, "100", this.textStyle);
+
+    this.monkey = this.game.add.sprite(this.game.world.centerX,this.game.world.centerY,"monkey",0);
+    this.monkey.anchor.setTo(0.5);
+    this.monkey.inputEnabled = true;
+    this.monkey.input.pixelPerfectClick = true;
+    this.monkey.input.enableDrag();
+    this.monkey.stats = {
+      health : 100,
+      fun : 100
     }
-    this.game.physics.arcade.enable(this.ninja);
-    // this.ninja.play("walk");
+    this.monkey.animations.add("eat",[0,1,2,1,3,1,2,1,3,1,0],10,false);
 
-    this.ground = this.game.add.sprite(0,580,"ground");
-    this.game.physics.arcade.enable(this.ground);
-    this.ground.body.allowGravity = false;
-    this.ground.body.immovable = true;
+    this.items = {};
 
-    let platformsData = [
-      {"x" : -30, "y" : 450},
-      {"x" : 170, "y" : 330},
-      {"x" : 80, "y" : 80},
-      {"x" : 20, "y" : 200}
-    ];
-    this.platforms = this.add.group();
-    this.platforms.enableBody = true;
+    this.items.candy = this.game.add.sprite(this.game.world.centerX,640 - 70,"candy");
+    this.items.candy.anchor.setTo(0.5);
+    this.items.candy.values = {
+      health : -10,
+      fun : 10
+    };
+    this.items.candy.inputEnabled = true;
+    this.items.candy.input.pixelPerfectClick = true;
+    this.items.candy.events.onInputDown.add(this.feedAnimal, this);
 
-    platformsData.forEach(platform => {
-      this.platforms.create(platform.x,platform.y,"platform");
-    });
-    this.platforms.setAll("body.immovable",true);
-    this.platforms.setAll("body.allowGravity",false);
+    this.items.refresh = this.game.add.sprite(this.game.world.centerX + 128,640 - 70,"refresh");
+    this.items.refresh.anchor.setTo(0.5);
+    this.items.refresh.values = {
+      fun : 5
+    };
+    this.items.refresh.inputEnabled = true;
+    this.items.refresh.input.pixelPerfectClick = true;
+    this.items.refresh.events.onInputDown.add(this.turnAround, this);
 
+    this.items.banana = this.game.add.sprite(this.game.world.centerX - 128,640 - 70,"banana");
+    this.items.banana.anchor.setTo(0.5);
+    this.items.banana.values = {
+      health : 10
+    };
+    this.items.banana.inputEnabled = true;
+    this.items.banana.input.pixelPerfectClick = true;
+    this.items.banana.events.onInputDown.add(this.feedAnimal, this);
 
+    this.chosenItem = null;
 
-    this.queen = this.game.add.sprite(this.game.world.centerX, 90, "queen");
-    this.queen.anchor.setTo(0.5);
-    this.game.physics.arcade.enable(this.queen);
-    this.queen.body.allowGravity = false;
-    this.queen.body.immovable = true;
+    this.gameLogic = {
+      blockedUI : false, // when pet is turning around
+      petChasingFood : false // when pet is chasing the food
+    };
 
-
-    // ninja movement :
-    this.cursors = this.game.input.keyboard.createCursorKeys();
-    this.createOnScreenControls();
-
-    // camera work
-    this.game.camera.follow(this.ninja);
-    // this.reducer = this.game.time.events.loop(Phaser.Timer.SECOND*10, this.reduceStats,this);
+    this.setTexts();
+    this.reducer = this.game.time.events.loop(Phaser.Timer.SECOND*10, this.reduceStats,this);
   },
   update : function(){
-    this.game.physics.arcade.collide(this.ninja, this.ground);
-    // this.game.physics.arcade.overlap(this.ninja, this.ground, () => {
-    //   console.log("overlap");
-    // });
-
-    if(this.cursors.left.isDown || this.ninja.customParams.goLeft) {
-      this.ninja.body.velocity.x = -this.ninja.customParams.speed;
-    } else if(this.cursors.right.isDown || this.ninja.customParams.goRight) {
-      this.ninja.body.velocity.x = this.ninja.customParams.speed;
-    } else {
-      this.ninja.body.velocity.x = 0;
-    }
-
-    if((this.cursors.up.isDown || this.ninja.customParams.mustJump) && this.ninja.body.touching.down) {
-      this.ninja.body.velocity.y = -this.ninja.customParams.speed * 2.2;
+    if(this.monkey.stats.health <=0 || this.monkey.stats.fun <=0){
+      // console.log(this.reducer);
+      // this.reducer.loop = false;
+      this.monkey.frame = 4;
+      this.gameLogic.blockedUI = true;
+      this.game.time.events.add(2000,this.handleDeath,this);
+      // this.handleDeath();
     }
   },
-  animate(){
-    this.ninja.play("walk");
+  feedAnimal : function(food, event) {
+    if(this.gameLogic.blockedUI) return;
+    this.clearSelection();
+    if(this.chosenItem === food){
+      this.chosenItem = null;
+      return;
+    };
+    this.chosenItem = food;
+    food.alpha = 0.4;
+  },
+  turnAround : function(refresh, event){
+    if(this.gameLogic.blockedUI) return;
+    this.gameLogic.blockedUI = true;
+    this.clearSelection();
+    this.chosenItem = refresh;
+    refresh.alpha = 0.4;
+
+    let rotatingPetAnimation = this.game.add.tween(this.monkey);
+    rotatingPetAnimation.to({angle : "+720"}, 700);
+    rotatingPetAnimation.onComplete.add(() => {
+      this.gameLogic.blockedUI = false;
+      this.clearSelection();
+      this.monkey.stats.fun += refresh.values.fun;
+      this.setTexts();
+    });
+
+    rotatingPetAnimation.start();
+  },
+  clearSelection(){
+    let item = this.chosenItem;
+    if(!item) return;
+    item.alpha = 1.0;
+  },
+  leaveFood(sprite,event){
+    if(!this.gameLogic.blockedUI && this.chosenItem && this.chosenItem !== this.items.refresh){
+      this.gameLogic.blockedUI = true;
+      this.clearSelection();
+
+      let foodX = event.position.x;
+      let foodY = event.position.y
+      let chosenFood = this.chosenItem;
+      let item = this.game.add.sprite(foodX,foodY+30,chosenFood.key);
+      item.anchor.setTo(0.5);
+
+      let rotatingPetAnimation = this.game.add.tween(this.monkey);
+      rotatingPetAnimation.to({x : foodX, y : foodY}, 700);
+      rotatingPetAnimation.onComplete.add(() => {
+        for(let stat in chosenFood.values){
+          if(chosenFood.values.hasOwnProperty(stat)){
+            this.monkey.stats[stat] += chosenFood.values[stat];
+          }
+        };
+        this.chosenItem = null;
+        item.destroy();
+        this.gameLogic.blockedUI = false;
+        this.monkey.play("eat");
+        this.setTexts();
+      });
+
+      rotatingPetAnimation.start();
+    }
+  },
+  setTexts(){
+    this.healthText.setText(this.monkey.stats.health);
+    this.funText.setText(this.monkey.stats.fun);
+  },
+  reduceStats(){
+    if(this.monkey.stats.health > 0 && this.monkey.stats.fun > 0){
+      this.monkey.stats.health -= 5;
+      this.monkey.stats.fun -= 5;
+      this.setTexts();
+    }
+
   },
   handleDeath(){
     this.game.state.start("HomeState");
-  },
-  createOnScreenControls(){
-    this.leftArrow = this.add.button(10,585,"moveBox");
-    this.rightArrow = this.add.button(100,585,"moveBox");
-    this.actionButton = this.add.button(270,585,"jumpBox");
-
-    this.leftArrow.alpha = 0.5;
-    this.rightArrow.alpha = 0.5;
-    this.actionButton.alpha = 0.5;
-
-    this.actionButton.events.onInputDown.add(() => {
-      this.ninja.customParams.mustJump = true;
-    });
-    this.actionButton.events.onInputOver.add(() => {
-      this.ninja.customParams.mustJump = true;
-    });
-
-    this.actionButton.events.onInputUp.add(() => {
-      this.ninja.customParams.mustJump = false;
-    });
-    this.actionButton.events.onInputOut.add(() => {
-      this.ninja.customParams.mustJump = false;
-    });
-
-    this.leftArrow.events.onInputDown.add(() => {
-      this.ninja.customParams.goLeft = true;
-    });
-    this.leftArrow.events.onInputOver.add(() => {
-      this.ninja.customParams.goLeft = true;
-    });
-
-    this.leftArrow.events.onInputUp.add(() => {
-      this.ninja.customParams.goLeft = false;
-    });
-    this.leftArrow.events.onInputOut.add(() => {
-      this.ninja.customParams.goLeft = false;
-    });
-
-    this.rightArrow.events.onInputDown.add(() => {
-      this.ninja.customParams.goRight = true;
-    });
-    this.rightArrow.events.onInputOver.add(() => {
-      this.ninja.customParams.goRight = true;
-    });
-
-    this.rightArrow.events.onInputUp.add(() => {
-      this.ninja.customParams.goRight = false;
-    });
-    this.rightArrow.events.onInputOut.add(() => {
-      this.ninja.customParams.goRight = false;
-    });
   }
 };
