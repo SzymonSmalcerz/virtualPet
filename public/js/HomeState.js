@@ -1,16 +1,19 @@
 let HomeState = {
-  init : function (){
-    this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-    this.scale.pageAlignHorizontally = true;
-    this.scale.pageAlignVertically = true;
-    this.scale.refresh();
+  create(){
+    this.textStyle = {
+      font : "20pt bold",
+    };
+
+    this.background = this.game.add.sprite(0,0,"background");
+    this.background.inputEnabled = true;
+    this.background.events.onInputDown.add(this.startGame, this);
+
+    let tapText = this.game.add.text(this.game.world.centerX, this.game.world.centerY, "tap to start", this.textStyle);
+    tapText.anchor.setTo(0.5);
 
   },
-  preload(){
-    this.load.image("progressBar","assets/progresBar.png");
-    this.load.spritesheet("monkey", "assets/monkey_spritesheet.png",180,180,5);
-  },
-  create(){
+  startGame(){
+    console.log("clicked");
     this.game.state.start("GameState");
   }
 }

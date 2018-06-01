@@ -1,14 +1,11 @@
 
 let GameState = {
   create : function(){
-
     this.background = this.game.add.sprite(0,0,"background");
     this.background.inputEnabled = true;
     this.background.events.onInputDown.add(this.leaveFood, this);
 
-    this.textStyle = {
-      font : "20pt bold",
-    };
+
     this.game.add.text(20, 20, "health", this.textStyle);
     this.game.add.text(200, 20, "fun", this.textStyle);
     this.healthText = this.game.add.text(100, 20, "100", this.textStyle);
@@ -150,6 +147,6 @@ let GameState = {
 
   },
   handleDeath(){
-    this.game.state.restart();
+    this.game.state.start("HomeState");
   }
 };

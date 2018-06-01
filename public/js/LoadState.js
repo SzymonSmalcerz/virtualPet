@@ -14,6 +14,6 @@ let LoadState = {
     this.load.image("refresh", "assets/refresh.png");
   },
   create(){
-    this.game.state.start("GameState");
+    this.game.state.start("HomeState");
   }
 }
