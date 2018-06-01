@@ -8,7 +8,6 @@ let LoadState = {
     this.progressBar.anchor.setTo(0.5);
     this.load.setPreloadSprite(this.progressBar);
 
-    this.load.image("fatjpg", "assets/fatjpg.jpg");
     this.load.image("background", "assets/background.png");
     this.load.image("banana", "assets/banana.png");
     this.load.image("candy", "assets/candy.png");
