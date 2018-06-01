@@ -15,6 +15,7 @@ let LoadState = {
     this.load.image("fatjpg", "assets/fatjpg.jpg");
   },
   create(){
+    console.log("XDDDD");
     this.game.state.start("HomeState");
   }
 }
